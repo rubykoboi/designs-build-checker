@@ -9,7 +9,6 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -23,15 +22,13 @@ import javax.swing.UIManager;
 public class App {
 
 	private JFrame frame;
-	private JPanel panel;
-	private static JTextArea inputTextArea;
 	private static JLabel topLabel;
 	private static JLabel bottomLabel;
 	private static JButton btnImport;
 	private static JButton btnRun;
 	private static JButton btnSource;
 	private static JScrollPane textAreaPane;
-	private JPanel middlePanel;
+	private static JTextArea textArea;
 	private static String DESTINATION_PATH;
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
@@ -73,13 +70,13 @@ public class App {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
-		topLabel = new JLabel("List out desings or item IDs to check which customers have them built out.");
+		topLabel = new JLabel("List out designs or item IDs to check which customers have them built out.");
 		frame.getContentPane().add(topLabel);
 		
 		Panel panel_1 = new Panel();
 		frame.getContentPane().add(panel_1);
 		textAreaPane = new JScrollPane();
-		JTextArea textArea = new JTextArea();
+		textArea = new JTextArea();
 		textArea.setDropMode(DropMode.INSERT);
 		textArea.setFont(new Font("Calibri Light", Font.PLAIN, 13));
 		textArea.setText("List of desings or item IDs separated by a comma (,).\r\n");
@@ -87,11 +84,13 @@ public class App {
 		textArea.setLineWrap(true);
 		
 		btnSource = new JButton("Source");
+		btnSource.setToolTipText("Choose master sheet of item IDs (might be labeled 'Customer Builds.xlsx').");
 		btnRun = new JButton("Run");
-		btnRun.setToolTipText("Tooltip");
+		btnRun.setToolTipText("Process the input list of designs and/or item IDs.");
 		btnImport = new JButton("Import");
+		btnImport.setToolTipText("Import a textfile with the list of designs and/or item IDs for checking.");
 		
-		JLabel lblNewLabel = new JLabel("separate by comma (,)");
+		bottomLabel = new JLabel("separate by comma (,)");
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
@@ -107,7 +106,7 @@ public class App {
 								.addComponent(btnSource, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnImport, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)))
-						.addComponent(lblNewLabel))
+						.addComponent(bottomLabel))
 					.addGap(341))
 		);
 		gl_panel_1.setVerticalGroup(
@@ -124,17 +123,11 @@ public class App {
 						.addGroup(gl_panel_1.createSequentialGroup()
 							.addComponent(textArea, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(lblNewLabel)))
+							.addComponent(bottomLabel)))
 					.addContainerGap())
 		);
 		panel_1.setLayout(gl_panel_1);
 		
-		panel = new JPanel();
-		inputTextArea = new JTextArea();
-		topLabel = new JLabel("List out designs or itemIDs");
-		bottomLabel = new JLabel("separate each style or item IDs by comma \",\" ");
-		btnImport = new JButton("Run");
 		
-		middlePanel = new JPanel();
 	}
 }
