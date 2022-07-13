@@ -2,6 +2,8 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.DropMode;
 import javax.swing.GroupLayout;
@@ -16,7 +18,7 @@ import javax.swing.UIManager;
 
 /**
  * token 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
- * @author safavieh
+ * @author diannerobbi
  *
  */
 public class App {
@@ -128,6 +130,25 @@ public class App {
 		);
 		panel_1.setLayout(gl_panel_1);
 		
+		btnSource.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
+		btnRun.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		btnImport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 }
