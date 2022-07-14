@@ -4,17 +4,24 @@ import java.awt.Font;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 import javax.swing.DropMode;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * token 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
@@ -26,14 +33,15 @@ public class App {
 	private JFrame frame;
 	private static JLabel topLabel;
 	private static JLabel bottomLabel;
-	private static JButton btnImport;
 	private static JButton btnRun;
+	private static JButton btnImport;
 	private static JButton btnSource;
 	private static JScrollPane textAreaPane;
 	private static JTextArea textArea;
 	private static String DESTINATION_PATH;
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
+	private JLabel lblStatus;
 
 	/**
 	 * Launch the application.
@@ -81,18 +89,21 @@ public class App {
 		textArea = new JTextArea();
 		textArea.setDropMode(DropMode.INSERT);
 		textArea.setFont(new Font("Calibri Light", Font.PLAIN, 13));
-		textArea.setText("List of desings or item IDs separated by a comma (,).\r\n");
 		textArea.setWrapStyleWord(true);
 		textArea.setLineWrap(true);
 		
 		btnSource = new JButton("Source");
 		btnSource.setToolTipText("Choose master sheet of item IDs (might be labeled 'Customer Builds.xlsx').");
-		btnRun = new JButton("Run");
-		btnRun.setToolTipText("Process the input list of designs and/or item IDs.");
 		btnImport = new JButton("Import");
 		btnImport.setToolTipText("Import a textfile with the list of designs and/or item IDs for checking.");
+		btnRun = new JButton("Run");
+		btnRun.setToolTipText("Process the input list of designs and/or item IDs.");
+		btnRun.setEnabled(false);
 		
-		bottomLabel = new JLabel("separate by comma (,)");
+		bottomLabel = new JLabel("Separate IDs from each other by a comma (,).");
+		bottomLabel.setFont(new Font("Calibri Light", Font.PLAIN, 12));
+		
+		lblStatus = new JLabel("");
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
@@ -105,9 +116,11 @@ public class App {
 							.addComponent(textArea, GroupLayout.PREFERRED_SIZE, 206, GroupLayout.PREFERRED_SIZE)
 							.addGap(18)
 							.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-								.addComponent(btnSource, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnImport, GroupLayout.PREFERRED_SIZE, 97, GroupLayout.PREFERRED_SIZE)))
+								.addComponent(btnImport, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
+								.addComponent(lblStatus, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
+								.addGroup(Alignment.TRAILING, gl_panel_1.createParallelGroup(Alignment.TRAILING, false)
+									.addComponent(btnSource, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
+									.addComponent(btnRun, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE))))
 						.addComponent(bottomLabel))
 					.addGap(341))
 		);
@@ -117,13 +130,16 @@ public class App {
 					.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
 						.addComponent(textAreaPane, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
 						.addGroup(gl_panel_1.createSequentialGroup()
-							.addComponent(btnSource)
-							.addGap(4)
-							.addComponent(btnRun)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnImport))
-						.addGroup(gl_panel_1.createSequentialGroup()
-							.addComponent(textArea, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
+							.addGroup(gl_panel_1.createParallelGroup(Alignment.TRAILING, false)
+								.addGroup(gl_panel_1.createSequentialGroup()
+									.addComponent(btnSource)
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(btnImport)
+									.addGap(4)
+									.addComponent(btnRun)
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(lblStatus, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+								.addComponent(textArea, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(bottomLabel)))
 					.addContainerGap())
@@ -131,6 +147,34 @@ public class App {
 		panel_1.setLayout(gl_panel_1);
 		
 		btnSource.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setFileFilter(new FileFilter() {
+	            	@Override
+	            	public boolean accept(File f) {
+	            		return f.isDirectory() || f.getName().toLowerCase().endsWith(".xlsx");
+	            	}
+	            	public String getDescription() {
+	            		return "*.xlsx files";
+	            	}
+	            });
+				int response = fileChooser.showOpenDialog(null);
+				if (response == JFileChooser.APPROVE_OPTION) {
+					File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
+					try {
+						if(file != null) {
+							BufferedReader br = new BufferedReader(new FileReader(file));
+							
+						}
+					} catch (Exception err) {
+						err.getStackTrace();
+					}
+				}
+			}
+		});
+		
+		btnImport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				
@@ -144,11 +188,16 @@ public class App {
 			}
 		});
 		
-		btnImport.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+		textArea.addFocusListener(new FocusAdapter() {
+			@Override
+		    public void focusLost(FocusEvent arg0) {
+				out("focused?" + arg0);
+		    }
 		});
+			
+	}
+	
+	public static void out(String stringToPrint) {
+		System.out.println(stringToPrint);
 	}
 }
