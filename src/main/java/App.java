@@ -2,6 +2,7 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Panel;
+import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -45,7 +46,7 @@ public class App {
 	private static String DESTINATION_PATH;
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
-	private JLabel lblStatus;
+	private JTextArea lblStatus;
 	
 	private static XSSFSheet sheet;
 	private static XSSFWorkbook workbook;
@@ -110,24 +111,28 @@ public class App {
 		bottomLabel = new JLabel("Separate IDs from each other by a comma (,).");
 		bottomLabel.setFont(new Font("Calibri Light", Font.PLAIN, 12));
 		
-		lblStatus = new JLabel("");
+		lblStatus = new JTextArea("test");
+		lblStatus.setEditable(false);
+		lblStatus.setBackground(SystemColor.menu);
+		lblStatus.setFont(new Font("Arial", Font.PLAIN, 10));
+		lblStatus.setLineWrap(true);
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_1.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(textAreaPane, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED, 333, Short.MAX_VALUE)
+					.addGap(333)
 					.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_panel_1.createSequentialGroup()
 							.addComponent(textArea, GroupLayout.PREFERRED_SIZE, 206, GroupLayout.PREFERRED_SIZE)
 							.addGap(18)
-							.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-								.addComponent(btnImport, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
-								.addComponent(lblStatus, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
-								.addGroup(Alignment.TRAILING, gl_panel_1.createParallelGroup(Alignment.TRAILING, false)
-									.addComponent(btnSource, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
-									.addComponent(btnRun, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE))))
+							.addGroup(gl_panel_1.createParallelGroup(Alignment.TRAILING)
+								.addComponent(lblStatus)
+								.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
+									.addComponent(btnImport, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+									.addComponent(btnRun, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
+									.addComponent(btnSource, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE))))
 						.addComponent(bottomLabel))
 					.addGap(341))
 		);
@@ -145,7 +150,7 @@ public class App {
 									.addGap(4)
 									.addComponent(btnRun)
 									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(lblStatus, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+									.addComponent(lblStatus))
 								.addComponent(textArea, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(bottomLabel)))
