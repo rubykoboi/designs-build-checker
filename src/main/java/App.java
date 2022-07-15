@@ -8,6 +8,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 
 import javax.swing.DropMode;
@@ -22,6 +23,9 @@ import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
+
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * token 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
@@ -42,6 +46,9 @@ public class App {
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
 	private JLabel lblStatus;
+	
+	private static XSSFSheet sheet;
+	private static XSSFWorkbook workbook;
 
 	/**
 	 * Launch the application.
@@ -165,7 +172,11 @@ public class App {
 					try {
 						if(file != null) {
 							BufferedReader br = new BufferedReader(new FileReader(file));
-							
+							// read in the source
+							FileInputStream fis = new FileInputStream(file);
+							workbook = new XSSFWorkbook(fis);
+							sheet = workbook.getSheetAt(0);
+							lblStatus.setText("Source selected: "+file.getAbsolutePath());
 						}
 					} catch (Exception err) {
 						err.getStackTrace();
