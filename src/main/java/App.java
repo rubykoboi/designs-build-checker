@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -57,6 +58,7 @@ public class App {
 	private static JPanel actionPanel;
 	private static JPanel bigPanel;
 	private static JPanel topLabelPanel;
+	private static JPanel bottomLabelPanel;
 	private static JPanel mainPanel;
 	private static XSSFSheet sheet;
 	private static XSSFWorkbook workbook;
@@ -96,7 +98,7 @@ public class App {
 	 */
 	private void initialize() {
 		frame = new JFrame("Style Lists Checker");
-		frame.setBounds(100, 100, 665, 275);
+		frame.setBounds(100, 100, 520, 275);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout());
 		
@@ -129,9 +131,10 @@ public class App {
 		actionPanel.add(lblStatus);
 		
 		// Input Text Area
-		textAreaPane = new JScrollPane();
-		textAreaPane.setSize(500,600);
 		textArea = new JTextArea();
+		textAreaPane = new JScrollPane(textArea);
+//		textAreaPane.setPreferredSize(new Dimension(585, 200));
+		textArea.setPreferredSize(new Dimension(300, 175));
 		textArea.setDropMode(DropMode.INSERT);
 		textArea.setFont(new Font("Calibri Light", Font.PLAIN, 13));
 		textArea.setWrapStyleWord(true);
@@ -142,13 +145,15 @@ public class App {
 		// Hint Label
 		bottomLabel = new JLabel("Separate IDs from each other by a comma (,).");
 		bottomLabel.setFont(new Font("Calibri Light", Font.PLAIN, 12));
-		bottomLabel.setAlignmentX(Component.BOTTOM_ALIGNMENT);
+		bottomLabelPanel = new JPanel();
+		bottomLabelPanel.setLayout(new BorderLayout());
+		bottomLabelPanel.add(bottomLabel, BorderLayout.WEST);
 		
 		// BoxLayout for the input text area and hint label
 		bigPanel = new JPanel();
 		bigPanel.setLayout(new BoxLayout(bigPanel, BoxLayout.Y_AXIS));
-		bigPanel.add(textArea);
-		bigPanel.add(bottomLabel);
+		bigPanel.add(textAreaPane);
+		bigPanel.add(bottomLabelPanel);
 		bigPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		
 		// GridBagLayout for the BoxLayout and GridLayout
@@ -175,14 +180,14 @@ public class App {
 		topLabel.setHorizontalAlignment(JLabel.LEFT);
 		topLabelPanel.setLayout(new BorderLayout());
 		topLabelPanel.add(topLabel, BorderLayout.WEST);
-		topLabelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
+		topLabelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 		bigBoxPanel.add(topLabelPanel);
 		bigBoxPanel.add(gridPanel);
 		
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(bigBoxPanel, BorderLayout.CENTER);
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 5));
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
 
 		frame.add(mainPanel);
 //		panel_1.add(buttonsPanel, BorderLayout.EAST);
