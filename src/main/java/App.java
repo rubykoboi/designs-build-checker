@@ -1,8 +1,9 @@
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Panel;
 import java.awt.SystemColor;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DropMode;
 import javax.swing.JButton;
@@ -50,9 +52,12 @@ public class App {
 	final static String FILE_EXTENSION = ".xlsx";
 	private JTextArea lblStatus;
 	private static JPanel buttonsPanel;
-	private static JPanel mainPanel;
+	private static JPanel bigBoxPanel;
+	private static JPanel gridPanel;
 	private static JPanel actionPanel;
 	private static JPanel bigPanel;
+	private static JPanel topLabelPanel;
+	private static JPanel mainPanel;
 	private static XSSFSheet sheet;
 	private static XSSFWorkbook workbook;
 	private static App window;
@@ -66,6 +71,7 @@ public class App {
 				try {
 					window = new App();
 					window.frame.setVisible(true);
+					window.frame.setResizable(false);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -89,14 +95,13 @@ public class App {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame("Designs Build Checker");
-		frame.setBounds(100, 100, 500, 250);
+		frame = new JFrame("Style Lists Checker");
+		frame.setBounds(100, 100, 665, 275);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout());
 		
-		// organize buttons in a Grid
+		// GridLayout for buttons
 		buttonsPanel = new JPanel(new GridLayout(3,1,10,12));
-		buttonsPanel.setBackground(Color.blue);
 		btnSource = new JButton("Source");
 		btnSource.setToolTipText("Choose master sheet of item IDs (might be labeled 'Customer Builds.xlsx').");
 		btnImport = new JButton("Import");
@@ -105,64 +110,81 @@ public class App {
 		btnRun.setToolTipText("Process the input list of designs and/or item IDs.");
 		btnRun.setEnabled(false);
 		
-		buttonsPanel.setSize(250,25);
 		buttonsPanel.add(btnSource);
 		buttonsPanel.add(btnImport);
 		buttonsPanel.add(btnRun);
 
-		// set source area
+		// Status Update Area
 		lblStatus = new JTextArea();
-		lblStatus.setSize(250, 250);
+		lblStatus.setSize(150, 250);
 		lblStatus.setEditable(false);
 		lblStatus.setBackground(SystemColor.menu);
 		lblStatus.setFont(new Font("Arial", Font.PLAIN, 10));
+		lblStatus.setWrapStyleWord(true);
 		lblStatus.setLineWrap(true);
 		
-		// set buttons and area in a grid
+		// GridLayout for buttons and area
 		actionPanel = new JPanel(new GridLayout(2, 1, 10, 10));
-		actionPanel.setBackground(Color.pink);
 		actionPanel.add(buttonsPanel);
 		actionPanel.add(lblStatus);
 		
-		// set text area for input
+		// Input Text Area
 		textAreaPane = new JScrollPane();
-		textAreaPane.setSize(600,600);
-		textArea = new JTextArea(10,30);
-		
+		textAreaPane.setSize(500,600);
+		textArea = new JTextArea();
 		textArea.setDropMode(DropMode.INSERT);
 		textArea.setFont(new Font("Calibri Light", Font.PLAIN, 13));
 		textArea.setWrapStyleWord(true);
 		textArea.setLineWrap(true);
-		textArea.setBackground(Color.yellow);
 //		textAreaPane.add(textArea);
 //		textAreaPane.setBackground(Color.green);
 		
-		// set label for hint
+		// Hint Label
 		bottomLabel = new JLabel("Separate IDs from each other by a comma (,).");
 		bottomLabel.setFont(new Font("Calibri Light", Font.PLAIN, 12));
-		bottomLabel.setBackground(Color.magenta);
-		bottomLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		bottomLabel.setAlignmentX(Component.BOTTOM_ALIGNMENT);
 		
-		// set text area and label with flow layout
+		// BoxLayout for the input text area and hint label
 		bigPanel = new JPanel();
 		bigPanel.setLayout(new BoxLayout(bigPanel, BoxLayout.Y_AXIS));
 		bigPanel.add(textArea);
 		bigPanel.add(bottomLabel);
 		bigPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		
-		// set flowlayout and grid layout into a gridbag
+		// GridBagLayout for the BoxLayout and GridLayout
+		GridBagLayout gridbag = new GridBagLayout();
+		GridBagConstraints c = new GridBagConstraints();
+		gridPanel = new JPanel();
+		c.fill = GridBagConstraints.VERTICAL;
+		c.weightx = 0.0;
+		c.gridx = 0;
+		c.gridy = 0;
+		gridPanel.setLayout(gridbag);
+		gridPanel.add(bigPanel, c);
+		c.fill = GridBagConstraints.VERTICAL;
+		c.weightx = 1.0;
+		c.gridx = 1;
+		c.gridy = 0;
+		gridPanel.add(actionPanel, c);
 		
-		// put top label in main panel
+		// BoxLayout for top label and main components
+		bigBoxPanel = new JPanel();
+		bigBoxPanel.setLayout(new BoxLayout(bigBoxPanel, BoxLayout.Y_AXIS));
+		topLabelPanel = new JPanel();
 		topLabel = new JLabel("List out designs or item IDs to check which customers have them built out.");
+		topLabel.setHorizontalAlignment(JLabel.LEFT);
+		topLabelPanel.setLayout(new BorderLayout());
+		topLabelPanel.add(topLabel, BorderLayout.WEST);
+		topLabelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 20));
+		bigBoxPanel.add(topLabelPanel);
+		bigBoxPanel.add(gridPanel);
 		
-		// put gridbag layout into main panel
-		
+		mainPanel = new JPanel();
+		mainPanel.setLayout(new BorderLayout());
+		mainPanel.add(bigBoxPanel, BorderLayout.CENTER);
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 5));
 
-		
-				
-		
-
-		frame.add(bigPanel);
+		frame.add(mainPanel);
 //		panel_1.add(buttonsPanel, BorderLayout.EAST);
 		
 		
