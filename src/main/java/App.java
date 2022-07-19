@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -33,6 +34,9 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -69,6 +73,8 @@ public class App {
 	private static App window;
 	private static File inputFile;
 	private static boolean disselect = false;
+	private static String[] listOfDesigns;
+	private static int[] listOfIndeces;
 
 	/**
 	 * Launch the application.
@@ -279,11 +285,13 @@ public class App {
 					readInputFile();
 					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 					JOptionPane.showMessageDialog(null, "Processing imported textfile...");
+					generateExcelFile();
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
 					readInputText();
 					out("Text Area has this text ++"+textArea.getText()+"++");
 					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 					JOptionPane.showMessageDialog(null, "Processing input...");
+					generateExcelFile();
 				} else {
 					// create pop-up
 					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
@@ -293,8 +301,59 @@ public class App {
 		});
 	}
 	
+	public static void generateExcelFile() {
+		try {
+			Set<Integer> indexList = new HashSet<Integer>();
+			XSSFWorkbook wb = new XSSFWorkbook(fis);
+
+			for(int i = 0; i < listOfDesigns.length; i++) {
+				int length = listOfDesigns[i].length();
+				if(length == 0) continue;
+				else out(listOfDesigns[i]);
+				Sheet sheet = wb.getSheetAt(0);
+				boolean turnedTrue = false;
+				Row row;
+				for(int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) { // Iterate Workbook rows
+					row = sheet.getRow(r);
+					Cell cell = row.getCell(0);
+					if(cell == null) continue;
+					else if(cell.getStringCellValue().length() >= length) {
+						if(cell.getStringCellValue().substring(0,length).equals(listOfDesigns[i])) {
+							turnedTrue = true;
+							indexList.add(r);
+						} else if(turnedTrue) break; // moves on to the next design
+					}
+				}
+			}
+			
+			XSSFWorkbook outb = new XSSFWorkbook();
+
+			
+			wb.close();
+			outb.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public static void readInputText() {
 		// read and save into list
+		Set<String> designList = new HashSet<String>();
+		out("created bufferedreader");
+		String line = textArea.getText();
+		out("this is the text in the textArea:\n"+line);
+		String[] temp;
+		temp = line.split("[\\s,]+");
+		designList.addAll(convertArrayToSet(temp));
+		Iterator<String> it = designList.iterator();
+		while(it.hasNext()) {
+			out(it.next()+""); // FOR CHECKING, CAN BE DELETED
+		}
+		listOfDesigns = new String[designList.size()];
+		designList.toArray(listOfDesigns); // SAVE INQUIRY LIST
+		Arrays.sort(listOfDesigns);
+		out("sorted the list from text input");
 	}
 	
 	public static void readInputFile() {
@@ -315,6 +374,10 @@ public class App {
 				line = br.readLine();
 			} while(line != null);
 			br.close();
+			listOfDesigns = new String[designList.size()];
+			designList.toArray(listOfDesigns); // SAVE INQUIRY LIST
+			Arrays.sort(listOfDesigns);
+			out("sorted the list from input file");
 		} catch (FileNotFoundException fnfe) {
 			fnfe.printStackTrace();
 			out("File Not Found Exception occurred in readInputFile function");
