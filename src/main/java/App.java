@@ -12,7 +12,12 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -141,7 +146,7 @@ public class App {
 		textArea.setLineWrap(true);
 		
 		// Hint Label
-		bottomLabel = new JLabel("Separate IDs from each other by a comma (,).");
+		bottomLabel = new JLabel("Place IDs on separate lines or separate by comma (,).");
 		bottomLabel.setFont(new Font("Calibri Light", Font.PLAIN, 12));
 		bottomLabelPanel = new JPanel();
 		bottomLabelPanel.setLayout(new BorderLayout());
@@ -189,6 +194,7 @@ public class App {
 
 		frame.add(mainPanel);
 		
+		// BUTTONS FUNCTIONALITIES
 		btnSource.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
@@ -252,11 +258,7 @@ public class App {
 							out("inside try");
 							if(inputFile != null) {
 								out("checked that file is not null");
-								BufferedReader br = new BufferedReader(new FileReader(inputFile));
-								out("created bufferedreader");
-								// read in the source
-								FileInputStream tis = new FileInputStream(inputFile);
-								out("created textfile input stream");
+								
 								out("just set text of label status. This should have already changed.");
 							}
 							btnImport.setText("Disselect File");
@@ -274,9 +276,11 @@ public class App {
 				// Verify input file, then input text
 				if(inputFile != null) { // Imported file takes precedence
 					out("textfile was imported");
+					readInputFile();
 					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 					JOptionPane.showMessageDialog(null, "Processing imported textfile...");
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
+					readInputText();
 					out("Text Area has this text ++"+textArea.getText()+"++");
 					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 					JOptionPane.showMessageDialog(null, "Processing input...");
@@ -287,10 +291,45 @@ public class App {
 				}
 			}
 		});
-
-		
-		
-		
+	}
+	
+	public static void readInputText() {
+		// read and save into list
+	}
+	
+	public static void readInputFile() {
+		try {
+			// read and save into list
+			Set<String> designList = new HashSet<String>();
+			BufferedReader br = new BufferedReader(new FileReader(inputFile));
+			out("created bufferedreader");
+			String line = br.readLine();
+			String[] temp;
+			do {
+				temp = line.split("[\\s,]+");
+				designList.addAll(convertArrayToSet(temp));
+				Iterator<String> it = designList.iterator();
+				while(it.hasNext()) {
+					out(it.next()+""); // FOR CHECKING, CAN BE DELETED
+				}
+				line = br.readLine();
+			} while(line != null);
+			br.close();
+		} catch (FileNotFoundException fnfe) {
+			fnfe.printStackTrace();
+			out("File Not Found Exception occurred in readInputFile function");
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			out("IO Exception occurred in readInputFile function");
+		}
+	}
+	
+	public static Set<String> convertArrayToSet(String[] array) {
+		Set<String> set = new HashSet<String>();
+		for (String elem : array) {
+			set.add(elem.toUpperCase());
+		}
+		return set;
 	}
 	
 	public static void out(String stringToPrint) {
