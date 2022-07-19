@@ -6,12 +6,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Panel;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +59,9 @@ public class App {
 	private static JPanel mainPanel;
 	private static XSSFSheet sheet;
 	private static XSSFWorkbook workbook;
+	private static FileInputStream fis;
 	private static App window;
+	private static File inputFile;
 
 	/**
 	 * Launch the application.
@@ -92,7 +91,7 @@ public class App {
     	}
 		initialize();
 	}
-
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -133,14 +132,11 @@ public class App {
 		// Input Text Area
 		textArea = new JTextArea();
 		textAreaPane = new JScrollPane(textArea);
-//		textAreaPane.setPreferredSize(new Dimension(585, 200));
 		textArea.setPreferredSize(new Dimension(300, 175));
 		textArea.setDropMode(DropMode.INSERT);
 		textArea.setFont(new Font("Calibri Light", Font.PLAIN, 13));
 		textArea.setWrapStyleWord(true);
 		textArea.setLineWrap(true);
-//		textAreaPane.add(textArea);
-//		textAreaPane.setBackground(Color.green);
 		
 		// Hint Label
 		bottomLabel = new JLabel("Separate IDs from each other by a comma (,).");
@@ -190,12 +186,9 @@ public class App {
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
 
 		frame.add(mainPanel);
-//		panel_1.add(buttonsPanel, BorderLayout.EAST);
-		
 		
 		btnSource.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				JFileChooser fileChooser = new JFileChooser();
 				fileChooser.setFileFilter(new FileFilter() {
 	            	@Override
@@ -209,16 +202,20 @@ public class App {
 				int response = fileChooser.showOpenDialog(null);
 				if (response == JFileChooser.APPROVE_OPTION) {
 					File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
+					lblStatus.setText("Source selected: "+file.getAbsolutePath());
+					btnRun.setEnabled(true);
+					out("File has been chosen");
 					try {
+						out("inside try");
 						if(file != null) {
+							out("checked that file is not null");
 							BufferedReader br = new BufferedReader(new FileReader(file));
+							out("created bufferedreader");
 							// read in the source
-							FileInputStream fis = new FileInputStream(file);
-							workbook = new XSSFWorkbook(fis);
-							sheet = workbook.getSheetAt(0);
-							lblStatus.setText("Source selected: "+file.getAbsolutePath());
-							window.frame.update(null);
-							
+							fis = new FileInputStream(file);
+							out("created fileinputstream");
+							out("created a sheet");
+							out("just set text of label status. This should have already changed.");
 						}
 					} catch (Exception err) {
 						err.getStackTrace();
@@ -229,32 +226,56 @@ public class App {
 		
 		btnImport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setFileFilter(new FileFilter() {
+	            	@Override
+	            	public boolean accept(File f) {
+	            		return f.isDirectory() || f.getName().toLowerCase().endsWith(".txt");
+	            	}
+	            	public String getDescription() {
+	            		return "*.txt files";
+	            	}
+	            });
+				int response = fileChooser.showOpenDialog(null);
+				if (response == JFileChooser.APPROVE_OPTION) {
+					inputFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+					lblStatus.setText("Input file is selected: "+inputFile.getAbsolutePath());
+					out("textfile has been chosen");
+					try {
+						out("inside try");
+						if(inputFile != null) {
+							out("checked that file is not null");
+							BufferedReader br = new BufferedReader(new FileReader(inputFile));
+							out("created bufferedreader");
+							// read in the source
+							FileInputStream tis = new FileInputStream(inputFile);
+							out("created textfile input stream");
+							out("just set text of label status. This should have already changed.");
+						}
+					} catch (Exception err) {
+						err.getStackTrace();
+					}
+				}
 			}
 		});
 		
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
+				// Verify input file, then input text
+				if(inputFile != null) { // Imported file takes precedence
+					out("textfile was imported");
+				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
+					out("Text Area has this text ++"+textArea.getText()+"++");
+					// process according to text
+				} else {
+					out("There is no input in the text area");
+				}
 			}
 		});
 
 		
-		Panel panel_1 = new Panel();
-		panel_1.setSize(frame.size());
-//		frame.getContentPane().add(panel_1);
 		
 		
-		
-		textArea.addFocusListener(new FocusAdapter() {
-			@Override
-		    public void focusLost(FocusEvent arg0) {
-				out("focused?" + arg0);
-		    }
-		});
-			
 	}
 	
 	public static void out(String stringToPrint) {
