@@ -21,6 +21,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -31,7 +32,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- * token 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
+ * 
  * @author diannerobbi
  *
  */
@@ -62,6 +63,7 @@ public class App {
 	private static FileInputStream fis;
 	private static App window;
 	private static File inputFile;
+	private static boolean disselect = false;
 
 	/**
 	 * Launch the application.
@@ -116,7 +118,7 @@ public class App {
 		buttonsPanel.add(btnRun);
 
 		// Status Update Area
-		lblStatus = new JTextArea();
+		lblStatus = new JTextArea("Select a source file to run inquiry.");
 		lblStatus.setSize(150, 250);
 		lblStatus.setEditable(false);
 		lblStatus.setBackground(SystemColor.menu);
@@ -214,7 +216,6 @@ public class App {
 							// read in the source
 							fis = new FileInputStream(file);
 							out("created fileinputstream");
-							out("created a sheet");
 							out("just set text of label status. This should have already changed.");
 						}
 					} catch (Exception err) {
@@ -226,36 +227,45 @@ public class App {
 		
 		btnImport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.setFileFilter(new FileFilter() {
-	            	@Override
-	            	public boolean accept(File f) {
-	            		return f.isDirectory() || f.getName().toLowerCase().endsWith(".txt");
-	            	}
-	            	public String getDescription() {
-	            		return "*.txt files";
-	            	}
-	            });
-				int response = fileChooser.showOpenDialog(null);
-				if (response == JFileChooser.APPROVE_OPTION) {
-					inputFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
-					lblStatus.setText("Input file is selected: "+inputFile.getAbsolutePath());
-					out("textfile has been chosen");
-					try {
-						out("inside try");
-						if(inputFile != null) {
-							out("checked that file is not null");
-							BufferedReader br = new BufferedReader(new FileReader(inputFile));
-							out("created bufferedreader");
-							// read in the source
-							FileInputStream tis = new FileInputStream(inputFile);
-							out("created textfile input stream");
-							out("just set text of label status. This should have already changed.");
+				if(disselect) {
+					inputFile = null;
+					btnImport.setText("Import");
+					lblStatus.setText("Input file removed.");
+				}
+				else {
+					JFileChooser fileChooser = new JFileChooser();
+					fileChooser.setFileFilter(new FileFilter() {
+		            	@Override
+		            	public boolean accept(File f) {
+		            		return f.isDirectory() || f.getName().toLowerCase().endsWith(".txt");
+		            	}
+		            	public String getDescription() {
+		            		return "*.txt files";
+		            	}
+		            });
+					int response = fileChooser.showOpenDialog(null);
+					if (response == JFileChooser.APPROVE_OPTION) {
+						inputFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+						lblStatus.setText("Input file is selected: "+inputFile.getAbsolutePath());
+						out("textfile has been chosen");
+						try {
+							out("inside try");
+							if(inputFile != null) {
+								out("checked that file is not null");
+								BufferedReader br = new BufferedReader(new FileReader(inputFile));
+								out("created bufferedreader");
+								// read in the source
+								FileInputStream tis = new FileInputStream(inputFile);
+								out("created textfile input stream");
+								out("just set text of label status. This should have already changed.");
+							}
+							btnImport.setText("Disselect File");
+						} catch (Exception err) {
+							err.getStackTrace();
 						}
-					} catch (Exception err) {
-						err.getStackTrace();
 					}
 				}
+				disselect = !disselect;
 			}
 		});
 		
@@ -264,10 +274,15 @@ public class App {
 				// Verify input file, then input text
 				if(inputFile != null) { // Imported file takes precedence
 					out("textfile was imported");
+					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
+					JOptionPane.showMessageDialog(null, "Processing imported textfile...");
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
 					out("Text Area has this text ++"+textArea.getText()+"++");
-					// process according to text
+					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
+					JOptionPane.showMessageDialog(null, "Processing input...");
 				} else {
+					// create pop-up
+					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
 					out("There is no input in the text area");
 				}
 			}
