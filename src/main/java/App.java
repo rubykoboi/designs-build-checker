@@ -13,11 +13,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -33,10 +36,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -326,8 +331,66 @@ public class App {
 				}
 			}
 			
+			// GET DESIRED DESTINATION
+			JFileChooser directoryChooser = new JFileChooser();
+			directoryChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			directoryChooser.setFileFilter(new FileNameExtensionFilter("*.xlsx files"));
+			int response = directoryChooser.showSaveDialog(null);
+			if (response == JFileChooser.APPROVE_OPTION) {
+				DESTINATION_PATH = directoryChooser.getSelectedFile().getAbsolutePath();
+				if (DESTINATION_PATH.length() < FILE_EXTENSION.length()) {
+					System.out.println("We added a file extension");
+					DESTINATION_PATH += FILE_EXTENSION;
+				} else if (!(DESTINATION_PATH.substring(DESTINATION_PATH.length() - FILE_EXTENSION.length()))
+						.equals(".xlsx")) {
+					DESTINATION_PATH += FILE_EXTENSION;
+					System.out.println("We added a file extension");
+				} else
+					System.out.println("We did not add a file extension");
+			}
+			
 			XSSFWorkbook outb = new XSSFWorkbook();
-
+			FileOutputStream fos = new FileOutputStream(DESTINATION_PATH);
+			List<String> header = new ArrayList<String>();
+			header.add("Item ID");
+			header.add("UPC");
+			header.add("AMA9000");
+			header.add("AME1900");
+			header.add("ASH6082");
+			header.add("BED7050A");
+			header.add("CSN6172");
+			header.add("GIL8692FS");
+			header.add("HOM4765");
+			header.add("HOM8573");
+			header.add("HOU6899M");
+			header.add("HSN4710");
+			header.add("KOH7000");
+			header.add("LOW2221");
+			header.add("NET1161");
+			header.add("ONE6000");
+			header.add("OVE041507");
+			header.add("PIE2117");
+			header.add("QVC1741");
+			header.add("TAR6266");
+			header.add("WAL4001");
+			header.add("ZUL5614");
+			
+			XSSFFont headerFont = outb.createFont();
+			Sheet sh = outb.createSheet();
+			headerFont.setBold(true);
+			for (int r = 0; r <= indexList.size(); r++) {
+				Row row = sh.createRow(r);
+				for (int col = 0; col < header.size(); col++) {
+					Cell cell = row.createCell(col);
+					if (r == 0) cell.setCellValue(header.get(col));
+					else cell.setCellValue("SET");
+				}
+				System.out.println();
+			}
+			
+			
+			
+			outb.write(fos);
 			
 			wb.close();
 			outb.close();
@@ -340,9 +403,7 @@ public class App {
 	public static void readInputText() {
 		// read and save into list
 		Set<String> designList = new HashSet<String>();
-		out("created bufferedreader");
 		String line = textArea.getText();
-		out("this is the text in the textArea:\n"+line);
 		String[] temp;
 		temp = line.split("[\\s,]+");
 		designList.addAll(convertArrayToSet(temp));
@@ -353,7 +414,6 @@ public class App {
 		listOfDesigns = new String[designList.size()];
 		designList.toArray(listOfDesigns); // SAVE INQUIRY LIST
 		Arrays.sort(listOfDesigns);
-		out("sorted the list from text input");
 	}
 	
 	public static void readInputFile() {
@@ -361,23 +421,18 @@ public class App {
 			// read and save into list
 			Set<String> designList = new HashSet<String>();
 			BufferedReader br = new BufferedReader(new FileReader(inputFile));
-			out("created bufferedreader");
 			String line = br.readLine();
 			String[] temp;
 			do {
 				temp = line.split("[\\s,]+");
 				designList.addAll(convertArrayToSet(temp));
 				Iterator<String> it = designList.iterator();
-				while(it.hasNext()) {
-					out(it.next()+""); // FOR CHECKING, CAN BE DELETED
-				}
 				line = br.readLine();
 			} while(line != null);
 			br.close();
 			listOfDesigns = new String[designList.size()];
 			designList.toArray(listOfDesigns); // SAVE INQUIRY LIST
 			Arrays.sort(listOfDesigns);
-			out("sorted the list from input file");
 		} catch (FileNotFoundException fnfe) {
 			fnfe.printStackTrace();
 			out("File Not Found Exception occurred in readInputFile function");
