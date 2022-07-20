@@ -48,6 +48,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class App {
 
+	private static int progress;
 	private JFrame frame;
 	private static JLabel topLabel;
 	private static JLabel bottomLabel;
@@ -60,7 +61,7 @@ public class App {
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
 	final static int HEADER_SIZE = 22;
-	private JTextArea lblStatus;
+	private static JTextArea lblStatus;
 	private static JPanel buttonsPanel;
 	private static JPanel bigBoxPanel;
 	private static JPanel gridPanel;
@@ -262,21 +263,23 @@ public class App {
 				// Verify input file, then input text
 				if(inputFile != null) { // Imported file takes precedence
 					readInputFile();
-					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
-					JOptionPane.showMessageDialog(null, "Processing imported textfile...");
-					generateExcelFile();
-					JOptionPane.showMessageDialog(null, "Your search results are printed out.\nPlease find it in the following path:\t"+DESTINATION_PATH);
+					everythingelse();
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
 					readInputText();
-					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
-					JOptionPane.showMessageDialog(null, "Processing input...");
-					generateExcelFile();
-					JOptionPane.showMessageDialog(null, "Your search results are printed out.\nPlease find it in the following path:\t"+DESTINATION_PATH);
+					everythingelse();
 				} else {
 					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		});
+	}
+	
+	public static void everythingelse() {
+		lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
+		JOptionPane.showMessageDialog(null, "Processing imported textfile...");
+		generateExcelFile();
+		JOptionPane.showMessageDialog(null, "Your search results are printed out. Please find it on the following path:\n"+DESTINATION_PATH);
+		lblStatus.setText("Process Completed. You may run another search.");
 	}
 	
 	public static void generateExcelFile() {
@@ -286,6 +289,7 @@ public class App {
 			XSSFWorkbook wb = new XSSFWorkbook(fis);
 			Sheet sheet = wb.getSheetAt(0);;
 			for(int i = 0; i < listOfDesigns.length; i++) {
+				progress = i/listOfDesigns.length;
 				int length = listOfDesigns[i].length();
 				if(length == 0) continue;
 				boolean turnedTrue = false;
@@ -316,14 +320,11 @@ public class App {
 			if (response == JFileChooser.APPROVE_OPTION) {
 				DESTINATION_PATH = directoryChooser.getSelectedFile().getAbsolutePath();
 				if (DESTINATION_PATH.length() < FILE_EXTENSION.length()) {
-					System.out.println("We added a file extension");
 					DESTINATION_PATH += FILE_EXTENSION;
 				} else if (!(DESTINATION_PATH.substring(DESTINATION_PATH.length() - FILE_EXTENSION.length()))
 						.equals(".xlsx")) {
 					DESTINATION_PATH += FILE_EXTENSION;
-					System.out.println("We added a file extension");
-				} else
-					System.out.println("We did not add a file extension");
+				} 
 			}
 			
 			XSSFWorkbook outb = new XSSFWorkbook();
@@ -347,9 +348,9 @@ public class App {
 			fos.close();
 			wb.close();
 			outb.close();
-		} catch (IOException e) {
+		} catch (IOException ioe) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ioe.printStackTrace();
 		}
 	}
 	
