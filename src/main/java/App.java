@@ -220,18 +220,8 @@ public class App {
 					File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
 					lblStatus.setText("Source selected: "+file.getAbsolutePath());
 					btnRun.setEnabled(true);
-					out("File has been chosen");
 					try {
-						out("inside try");
-						if(file != null) {
-							out("checked that file is not null");
-							BufferedReader br = new BufferedReader(new FileReader(file));
-							out("created bufferedreader");
-							// read in the source
-							fis = new FileInputStream(file);
-							out("created fileinputstream");
-							out("just set text of label status. This should have already changed.");
-						}
+						if(file != null) fis = new FileInputStream(file);
 					} catch (Exception err) {
 						err.getStackTrace();
 					}
@@ -260,18 +250,7 @@ public class App {
 					if (response == JFileChooser.APPROVE_OPTION) {
 						inputFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
 						lblStatus.setText("Input file is selected: "+inputFile.getAbsolutePath());
-						out("textfile has been chosen");
-						try {
-							out("inside try");
-							if(inputFile != null) {
-								out("checked that file is not null");
-								
-								out("just set text of label status. This should have already changed.");
-							}
-							btnImport.setText("Disselect File");
-						} catch (Exception err) {
-							err.getStackTrace();
-						}
+						btnImport.setText("Disselect File");
 					}
 				}
 				disselect = !disselect;
@@ -282,7 +261,6 @@ public class App {
 			public void actionPerformed(ActionEvent e) {
 				// Verify input file, then input text
 				if(inputFile != null) { // Imported file takes precedence
-					out("textfile was imported");
 					readInputFile();
 					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 					JOptionPane.showMessageDialog(null, "Processing imported textfile...");
@@ -290,15 +268,12 @@ public class App {
 					JOptionPane.showMessageDialog(null, "Your search results are printed out.\nPlease find it in the following path:\t"+DESTINATION_PATH);
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
 					readInputText();
-					out("Text Area has this text ++"+textArea.getText()+"++");
 					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 					JOptionPane.showMessageDialog(null, "Processing input...");
 					generateExcelFile();
-					JOptionPane.showMessageDialog(null, "Processing input...");
+					JOptionPane.showMessageDialog(null, "Your search results are printed out.\nPlease find it in the following path:\t"+DESTINATION_PATH);
 				} else {
-					// create pop-up
 					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
-					out("There is no input in the text area");
 				}
 			}
 		});
@@ -313,7 +288,6 @@ public class App {
 			for(int i = 0; i < listOfDesigns.length; i++) {
 				int length = listOfDesigns[i].length();
 				if(length == 0) continue;
-				else out(listOfDesigns[i]);
 				boolean turnedTrue = false;
 				Row row;
 				for(int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) { // Iterate Workbook rows
@@ -357,32 +331,19 @@ public class App {
 						
 			XSSFFont headerFont = outb.createFont();
 			Sheet sh = outb.createSheet();
-			if(sheet==null) {
-				out("sheet is null");
-			}
 			headerFont.setBold(true);
 			for (int r = 0; r < listOfIndeces.length; r++) {
 				Row row = sh.createRow(r);
 				Row rowin = sheet.getRow(listOfIndeces[r]);
-				if(rowin == null) {
-					out("rowin is null!");
-				}
-				out(r+": list of indeces is --> " + listOfIndeces[r]);
 				for (int col = 0; col < HEADER_SIZE; col++) {
 					Cell cell = row.createCell(col);
 					Cell cell2 = rowin.getCell(col);
-					if(cell2==null) {
-						out("cell2 is null...?????");
-						out("what is the column? "+col);
-						out("what is the row??? "+r);
-						cell.setBlank();
-					} else cell.setCellValue(rowin.getCell(col).getStringCellValue());
+					if(cell2==null) cell.setBlank();
+					else cell.setCellValue(rowin.getCell(col).getStringCellValue());
 				}
-				out("set row " + r);
 			}
 			
 			outb.write(fos);
-			out("finished writing onto excel");
 			fos.close();
 			wb.close();
 			outb.close();
@@ -400,9 +361,6 @@ public class App {
 		temp = line.split("[\\s,]+");
 		designList.addAll(convertArrayToSet(temp));
 		Iterator<String> it = designList.iterator();
-		while(it.hasNext()) {
-			out(it.next()+""); // FOR CHECKING, CAN BE DELETED
-		}
 		listOfDesigns = new String[designList.size()];
 		designList.toArray(listOfDesigns); // SAVE INQUIRY LIST
 		Arrays.sort(listOfDesigns);
@@ -427,10 +385,8 @@ public class App {
 			Arrays.sort(listOfDesigns);
 		} catch (FileNotFoundException fnfe) {
 			fnfe.printStackTrace();
-			out("File Not Found Exception occurred in readInputFile function");
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
-			out("IO Exception occurred in readInputFile function");
 		}
 	}
 	
