@@ -16,11 +16,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -46,9 +44,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- * 
  * @author diannerobbi
- *
  */
 public class App {
 
@@ -63,6 +59,7 @@ public class App {
 	private static String DESTINATION_PATH;
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
+	final static int HEADER_SIZE = 22;
 	private JTextArea lblStatus;
 	private static JPanel buttonsPanel;
 	private static JPanel bigBoxPanel;
@@ -248,8 +245,7 @@ public class App {
 					inputFile = null;
 					btnImport.setText("Import");
 					lblStatus.setText("Input file removed.");
-				}
-				else {
+				} else {
 					JFileChooser fileChooser = new JFileChooser();
 					fileChooser.setFileFilter(new FileFilter() {
 		            	@Override
@@ -291,12 +287,14 @@ public class App {
 					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 					JOptionPane.showMessageDialog(null, "Processing imported textfile...");
 					generateExcelFile();
+					JOptionPane.showMessageDialog(null, "Your search results are printed out.\nPlease find it in the following path:\t"+DESTINATION_PATH);
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
 					readInputText();
 					out("Text Area has this text ++"+textArea.getText()+"++");
 					lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 					JOptionPane.showMessageDialog(null, "Processing input...");
 					generateExcelFile();
+					JOptionPane.showMessageDialog(null, "Processing input...");
 				} else {
 					// create pop-up
 					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
@@ -309,13 +307,13 @@ public class App {
 	public static void generateExcelFile() {
 		try {
 			Set<Integer> indexList = new HashSet<Integer>();
+			indexList.add(0); // Add the header index for copying over
 			XSSFWorkbook wb = new XSSFWorkbook(fis);
-
+			Sheet sheet = wb.getSheetAt(0);;
 			for(int i = 0; i < listOfDesigns.length; i++) {
 				int length = listOfDesigns[i].length();
 				if(length == 0) continue;
 				else out(listOfDesigns[i]);
-				Sheet sheet = wb.getSheetAt(0);
 				boolean turnedTrue = false;
 				Row row;
 				for(int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) { // Iterate Workbook rows
@@ -331,10 +329,15 @@ public class App {
 				}
 			}
 			
+			listOfIndeces = new int[indexList.size()];
+			listOfIndeces = convertSetToArray(indexList);
+			Arrays.sort(listOfIndeces);
+			
 			// GET DESIRED DESTINATION
 			JFileChooser directoryChooser = new JFileChooser();
+			directoryChooser.setDialogTitle("Select a Destination for the Output Excel File (*.xlsx)");
 			directoryChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			directoryChooser.setFileFilter(new FileNameExtensionFilter("*.xlsx files"));
+			directoryChooser.setFileFilter(new FileNameExtensionFilter("xlsx files (*.xlsx)", "xlsx"));
 			int response = directoryChooser.showSaveDialog(null);
 			if (response == JFileChooser.APPROVE_OPTION) {
 				DESTINATION_PATH = directoryChooser.getSelectedFile().getAbsolutePath();
@@ -351,47 +354,36 @@ public class App {
 			
 			XSSFWorkbook outb = new XSSFWorkbook();
 			FileOutputStream fos = new FileOutputStream(DESTINATION_PATH);
-			List<String> header = new ArrayList<String>();
-			header.add("Item ID");
-			header.add("UPC");
-			header.add("AMA9000");
-			header.add("AME1900");
-			header.add("ASH6082");
-			header.add("BED7050A");
-			header.add("CSN6172");
-			header.add("GIL8692FS");
-			header.add("HOM4765");
-			header.add("HOM8573");
-			header.add("HOU6899M");
-			header.add("HSN4710");
-			header.add("KOH7000");
-			header.add("LOW2221");
-			header.add("NET1161");
-			header.add("ONE6000");
-			header.add("OVE041507");
-			header.add("PIE2117");
-			header.add("QVC1741");
-			header.add("TAR6266");
-			header.add("WAL4001");
-			header.add("ZUL5614");
-			
+						
 			XSSFFont headerFont = outb.createFont();
 			Sheet sh = outb.createSheet();
+			if(sheet==null) {
+				out("sheet is null");
+			}
 			headerFont.setBold(true);
-			for (int r = 0; r <= indexList.size(); r++) {
+			for (int r = 0; r < listOfIndeces.length; r++) {
 				Row row = sh.createRow(r);
-				for (int col = 0; col < header.size(); col++) {
-					Cell cell = row.createCell(col);
-					if (r == 0) cell.setCellValue(header.get(col));
-					else cell.setCellValue("SET");
+				Row rowin = sheet.getRow(listOfIndeces[r]);
+				if(rowin == null) {
+					out("rowin is null!");
 				}
-				System.out.println();
+				out(r+": list of indeces is --> " + listOfIndeces[r]);
+				for (int col = 0; col < HEADER_SIZE; col++) {
+					Cell cell = row.createCell(col);
+					Cell cell2 = rowin.getCell(col);
+					if(cell2==null) {
+						out("cell2 is null...?????");
+						out("what is the column? "+col);
+						out("what is the row??? "+r);
+						cell.setBlank();
+					} else cell.setCellValue(rowin.getCell(col).getStringCellValue());
+				}
+				out("set row " + r);
 			}
 			
-			
-			
 			outb.write(fos);
-			
+			out("finished writing onto excel");
+			fos.close();
 			wb.close();
 			outb.close();
 		} catch (IOException e) {
@@ -448,6 +440,16 @@ public class App {
 			set.add(elem.toUpperCase());
 		}
 		return set;
+	}
+	
+	public static int[] convertSetToArray(Set<Integer> set) {
+		int[] array = new int[set.size()];
+		Iterator<Integer> it = set.iterator();
+		int counter = 0;
+		while(it.hasNext()) {
+			array[counter++] = it.next();
+		}
+		return array;
 	}
 	
 	public static void out(String stringToPrint) {
