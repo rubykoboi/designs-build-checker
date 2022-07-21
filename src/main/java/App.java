@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,10 +25,11 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DropMode;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -35,12 +37,12 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.basic.BasicButtonUI;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -50,11 +52,11 @@ public class App {
 
 	private static int progress;
 	private JFrame frame;
-	private static JLabel topLabel;
-	private static JLabel bottomLabel;
+	private static JTextArea topLabel;
 	private static JButton btnRun;
 	private static JButton btnImport;
 	private static JButton btnSource;
+	private static JButton btnHow;
 	private static JScrollPane textAreaPane;
 	private static JTextArea textArea;
 	private static String DESTINATION_PATH;
@@ -68,10 +70,9 @@ public class App {
 	private static JPanel actionPanel;
 	private static JPanel bigPanel;
 	private static JPanel topLabelPanel;
-	private static JPanel bottomLabelPanel;
 	private static JPanel mainPanel;
-	private static XSSFSheet sheet;
-	private static XSSFWorkbook workbook;
+	private static JPanel howToPanel;
+	private static JPanel rightPanel;
 	private static FileInputStream fis;
 	private static App window;
 	private static File inputFile;
@@ -113,14 +114,14 @@ public class App {
 	 */
 	private void initialize() {
 		frame = new JFrame("Style Lists Checker");
-		frame.setBounds(100, 100, 520, 275);
+		frame.setBounds(100, 100, 520, 305);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout());
 		
 		// GridLayout for buttons
 		buttonsPanel = new JPanel(new GridLayout(3,1,10,12));
 		btnSource = new JButton("Source");
-		btnSource.setToolTipText("Choose master sheet of item IDs (might be labeled 'Customer Builds.xlsx').");
+		btnSource.setToolTipText("Choose master sheet of item IDs (might be labeled 'Customer Style List Master Sheet').");
 		btnImport = new JButton("Import");
 		btnImport.setToolTipText("Import a textfile with the list of designs and/or item IDs for checking.");
 		btnRun = new JButton("Run");
@@ -140,10 +141,25 @@ public class App {
 		lblStatus.setWrapStyleWord(true);
 		lblStatus.setLineWrap(true);
 		
+		// How-To Button
+		Icon icon = new ImageIcon("C:\\Users\\safavieh\\Pictures\\how-to-icon.png"); // TO-DO: Update image source
+		btnHow = new JButton(icon);
+		btnHow.setForeground(SystemColor.menu);
+		btnHow.setUI(new BasicButtonUI());
+		btnHow.setToolTipText("How do I use this program?");
+		btnHow.setMargin(new Insets(0, 0, 0, 0));
+		howToPanel = new JPanel(new BorderLayout());
+		howToPanel.add(btnHow, BorderLayout.LINE_END);
+		
 		// GridLayout for buttons and area
 		actionPanel = new JPanel(new GridLayout(2, 1, 10, 10));
 		actionPanel.add(buttonsPanel);
 		actionPanel.add(lblStatus);
+		
+		// BorderLayout for GridLayout and How-To Button
+		rightPanel = new JPanel(new BorderLayout());
+		rightPanel.add(actionPanel, BorderLayout.CENTER);
+		rightPanel.add(howToPanel, BorderLayout.PAGE_END);
 		
 		// Input Text Area
 		textArea = new JTextArea();
@@ -154,18 +170,10 @@ public class App {
 		textArea.setWrapStyleWord(true);
 		textArea.setLineWrap(true);
 		
-		// Hint Label
-		bottomLabel = new JLabel("Place IDs on separate lines or separate by comma (,).");
-		bottomLabel.setFont(new Font("Calibri Light", Font.PLAIN, 12));
-		bottomLabelPanel = new JPanel();
-		bottomLabelPanel.setLayout(new BorderLayout());
-		bottomLabelPanel.add(bottomLabel, BorderLayout.WEST);
-		
 		// BoxLayout for the input text area and hint label
 		bigPanel = new JPanel();
 		bigPanel.setLayout(new BoxLayout(bigPanel, BoxLayout.Y_AXIS));
 		bigPanel.add(textAreaPane);
-		bigPanel.add(bottomLabelPanel);
 		bigPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		
 		// GridBagLayout for the BoxLayout and GridLayout
@@ -178,18 +186,24 @@ public class App {
 		c.gridy = 0;
 		gridPanel.setLayout(gridbag);
 		gridPanel.add(bigPanel, c);
+		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.VERTICAL;
 		c.weightx = 1.0;
 		c.gridx = 1;
 		c.gridy = 0;
-		gridPanel.add(actionPanel, c);
+		gridPanel.add(rightPanel, c);
 		
 		// BoxLayout for top label and main components
 		bigBoxPanel = new JPanel();
 		bigBoxPanel.setLayout(new BoxLayout(bigBoxPanel, BoxLayout.Y_AXIS));
 		topLabelPanel = new JPanel();
-		topLabel = new JLabel("List out designs or item IDs to check which customers have them built out.");
-		topLabel.setHorizontalAlignment(JLabel.LEFT);
+		topLabel = new JTextArea("List out designs or item IDs to check which customers have them built out. Place IDs on separate lines or separate by comma (,).");
+		topLabel.setSize(435, 50);
+		topLabel.setEditable(false);
+		topLabel.setBackground(SystemColor.menu);
+		topLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+		topLabel.setWrapStyleWord(true);
+		topLabel.setLineWrap(true);
 		topLabelPanel.setLayout(new BorderLayout());
 		topLabelPanel.add(topLabel, BorderLayout.WEST);
 		topLabelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
@@ -201,7 +215,7 @@ public class App {
 		mainPanel.add(bigBoxPanel, BorderLayout.CENTER);
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 0));
 
-		frame.add(mainPanel);
+		frame.getContentPane().add(mainPanel);
 		
 		// BUTTONS FUNCTIONALITIES
 		btnSource.addActionListener(new ActionListener() {
@@ -263,20 +277,26 @@ public class App {
 				// Verify input file, then input text
 				if(inputFile != null) { // Imported file takes precedence
 					readInputFile();
-					everythingelse();
+					everythingelse("Processing imported textfile...");
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
 					readInputText();
-					everythingelse();
+					everythingelse("Processing list of text input...");
 				} else {
 					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		});
+		
+		btnHow.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		})
 	}
 	
-	public static void everythingelse() {
+	public static void everythingelse(String message) {
 		lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
-		JOptionPane.showMessageDialog(null, "Processing imported textfile...");
+		JOptionPane.showMessageDialog(null, message);
 		generateExcelFile();
 		JOptionPane.showMessageDialog(null, "Your search results are printed out. Please find it on the following path:\n"+DESTINATION_PATH);
 		lblStatus.setText("Process Completed. You may run another search.");
