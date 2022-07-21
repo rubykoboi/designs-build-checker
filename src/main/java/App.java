@@ -280,7 +280,7 @@ public class App {
 					everythingelse("Processing imported textfile...");
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
 					readInputText();
-					everythingelse("Processing list of text input...");
+					everythingelse("Processing text input...");
 				} else {
 					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
 				}
