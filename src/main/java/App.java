@@ -141,17 +141,19 @@ public class App {
 		lblStatus.setLineWrap(true);
 		
 		// How-To Button
-		Icon icon = new ImageIcon("C:\\Users\\safavieh\\Pictures\\how-to-icon.png"); // TO-DO: Update image source
+		Icon icon = new ImageIcon("C:\\Users\\safavieh\\Pictures\\how-to-icon.png");
 		btnHow = new JButton(icon);
 		btnHow.setForeground(SystemColor.menu);
 		btnHow.setUI(new BasicButtonUI());
 		btnHow.setToolTipText("How do I use this program?");
 		btnHow.setMargin(new Insets(0, 0, 0, 0));
 		howToPanel = new JPanel(new BorderLayout());
+		howToPanel.setBounds(0, 0, 50, 55);
+		howToPanel.setSize(60, 110);
 		howToPanel.add(btnHow, BorderLayout.LINE_END);
 		
 		// GridLayout for buttons and area
-		actionPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+		actionPanel = new JPanel(new GridLayout(2, 1, 10, 5));
 		actionPanel.add(buttonsPanel);
 		actionPanel.add(lblStatus);
 		
@@ -163,7 +165,7 @@ public class App {
 		// Input Text Area
 		textArea = new JTextArea();
 		textAreaPane = new JScrollPane(textArea);
-		textAreaPane.setPreferredSize(new Dimension(300, 175));
+		textAreaPane.setPreferredSize(new Dimension(300, 0));
 		textArea.setDropMode(DropMode.INSERT);
 		textArea.setFont(new Font("Calibri Light", Font.PLAIN, 13));
 		textArea.setWrapStyleWord(true);
