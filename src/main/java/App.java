@@ -1,5 +1,5 @@
 import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -68,7 +68,6 @@ public class App {
 	private static JPanel bigBoxPanel;
 	private static JPanel gridPanel;
 	private static JPanel actionPanel;
-	private static JPanel bigPanel;
 	private static JPanel topLabelPanel;
 	private static JPanel mainPanel;
 	private static JPanel howToPanel;
@@ -164,17 +163,11 @@ public class App {
 		// Input Text Area
 		textArea = new JTextArea();
 		textAreaPane = new JScrollPane(textArea);
-		textArea.setPreferredSize(new Dimension(300, 175));
+		textAreaPane.setPreferredSize(new Dimension(300, 175));
 		textArea.setDropMode(DropMode.INSERT);
 		textArea.setFont(new Font("Calibri Light", Font.PLAIN, 13));
 		textArea.setWrapStyleWord(true);
 		textArea.setLineWrap(true);
-		
-		// BoxLayout for the input text area and hint label
-		bigPanel = new JPanel();
-		bigPanel.setLayout(new BoxLayout(bigPanel, BoxLayout.Y_AXIS));
-		bigPanel.add(textAreaPane);
-		bigPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		
 		// GridBagLayout for the BoxLayout and GridLayout
 		GridBagLayout gridbag = new GridBagLayout();
@@ -185,7 +178,7 @@ public class App {
 		c.gridx = 0;
 		c.gridy = 0;
 		gridPanel.setLayout(gridbag);
-		gridPanel.add(bigPanel, c);
+		gridPanel.add(textAreaPane, c);
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.VERTICAL;
 		c.weightx = 1.0;
@@ -383,6 +376,7 @@ public class App {
 			fos.close();
 			wb.close();
 			outb.close();
+			Desktop.getDesktop().open(new File(DESTINATION_PATH));
 		} catch (IOException ioe) {
 			// TODO Auto-generated catch block
 			ioe.printStackTrace();
