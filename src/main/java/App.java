@@ -73,8 +73,8 @@ public class App {
 	private static JPanel mainPanel;
 	private static JPanel howToPanel;
 	private static JPanel rightPanel;
-	private static FileInputStream fis;
 	private static App window;
+	private static File sourceFile;
 	private static File inputFile;
 	private static boolean disselect = false;
 	private static String[] listOfDesigns;
@@ -236,7 +236,7 @@ public class App {
 					lblStatus.setText("Source selected: "+file.getAbsolutePath());
 					btnRun.setEnabled(true);
 					try {
-						if(file != null) fis = new FileInputStream(file);
+						if(file != null) sourceFile = file;
 					} catch (Exception err) {
 						err.getStackTrace();
 					}
@@ -289,9 +289,23 @@ public class App {
 		
 		btnHow.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				JOptionPane.showMessageDialog(null, "To run this program, you need a source file and a list of designs.\n"
+						+"\nComponents:"
+						+"\n\u2022 [Source] - button to select your source file. Select the latest master style list to get an accurate search result."
+						+"\n\u2022 [Import] - button to import your textfile with a list of designs you wish to inquire about."
+						+"\n\u2003\u2003\u2003\u2003\u2003This takes precedence over the text area. If there is an imported file, "
+						+"\n\u2003\u2003\u2003\u2003\u2003that file will be processed regardless of any text input in the text area."
+						+"\n\u2022 Text Area - where you type in your list of designs to check."
+						+"\n\u2022 [Run]\u2003 - button to run your inquiry. Click this when you have both selected your source file and "
+						+"\n\u2003\u2003\u2003\u2003\u2003have input the styles you wish to check for."
+						+"\n\nTo separate the styles from each other, you can*:"
+						+"\n\u20031. place them on separate lines,"
+						+"\n\u20032. use a comma (,),"
+						+"\n\u20033. and/or add a space in between two styles."
+						+"\n\u2004*This is applicable to both import file (.txt) and the text input area.",
+						"How To Run The Program", JOptionPane.PLAIN_MESSAGE, null);
 			}
-		})
+		});
 	}
 	
 	public static void everythingelse(String message) {
@@ -306,8 +320,9 @@ public class App {
 		try {
 			Set<Integer> indexList = new HashSet<Integer>();
 			indexList.add(0); // Add the header index for copying over
+			FileInputStream fis = new FileInputStream(sourceFile);
 			XSSFWorkbook wb = new XSSFWorkbook(fis);
-			Sheet sheet = wb.getSheetAt(0);;
+			Sheet sheet = wb.getSheetAt(0);
 			for(int i = 0; i < listOfDesigns.length; i++) {
 				progress = i/listOfDesigns.length;
 				int length = listOfDesigns[i].length();
