@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DropMode;
@@ -141,8 +142,15 @@ public class App {
 		lblStatus.setLineWrap(true);
 		
 		// How-To Button
-		Icon icon = new ImageIcon("C:\\Users\\safavieh\\Pictures\\how-to-icon.png");
+		try {
+			Icon icon = new ImageIcon(ImageIO.read(getClass().getResource("/how-to-icon.png")));
+		
+//		Icon icon = new ImageIcon("C:\\Users\\safavieh\\Pictures\\how-to-icon.png");
 		btnHow = new JButton(icon);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		btnHow.setForeground(SystemColor.menu);
 		btnHow.setUI(new BasicButtonUI());
 		btnHow.setToolTipText("How do I use this program?");
