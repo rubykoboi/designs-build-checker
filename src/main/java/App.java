@@ -18,15 +18,14 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DropMode;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -61,9 +60,10 @@ public class App {
 	private static JScrollPane textAreaPane;
 	private static JTextArea textArea;
 	private static String DESTINATION_PATH;
+	private static String TODAY;
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
-	final static int HEADER_SIZE = 22;
+	final static int HEADER_SIZE = 23;
 	private static JTextArea lblStatus;
 	private static JPanel buttonsPanel;
 	private static JPanel bigBoxPanel;
@@ -106,6 +106,8 @@ public class App {
     	} catch (Throwable ex) {
     		ex.printStackTrace();
     	}
+		Calendar calendar = Calendar.getInstance();
+		TODAY = (calendar.get(Calendar.MONTH)+1)+"."+calendar.get(Calendar.DATE);
 		initialize();
 	}
 	
@@ -123,34 +125,26 @@ public class App {
 		btnSource = new JButton("Source");
 		btnSource.setToolTipText("Choose master sheet of item IDs (might be labeled 'Customer Style List Master Sheet').");
 		btnImport = new JButton("Import");
-		btnImport.setToolTipText("Import a textfile with the list of designs and/or item IDs for checking.");
+		btnImport.setToolTipText("Import a textfile (*.txt) with the list of designs and/or item IDs for checking.");
 		btnRun = new JButton("Run");
 		btnRun.setToolTipText("Process the input list of designs and/or item IDs.");
-		btnRun.setEnabled(false);
+//		btnRun.setEnabled(false);
 		
 		buttonsPanel.add(btnSource);
 		buttonsPanel.add(btnImport);
 		buttonsPanel.add(btnRun);
 
 		// Status Update Area
-		lblStatus = new JTextArea("Select a source file to run inquiry.");
+		lblStatus = new JTextArea("List out designs to check.");
 		lblStatus.setSize(150, 250);
 		lblStatus.setEditable(false);
 		lblStatus.setBackground(SystemColor.menu);
 		lblStatus.setFont(new Font("Arial", Font.PLAIN, 10));
 		lblStatus.setWrapStyleWord(true);
 		lblStatus.setLineWrap(true);
-		
-		// How-To Button
-		try {
-			Icon icon = new ImageIcon(ImageIO.read(getClass().getResource("/how-to-icon.png")));
-		
-//		Icon icon = new ImageIcon("C:\\Users\\safavieh\\Pictures\\how-to-icon.png");
-		btnHow = new JButton(icon);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+
+		btnHow = new JButton();
+		btnHow.setIcon(new ImageIcon(App.class.getResource("/buttonpic/how-to-icon.png")));
 		btnHow.setForeground(SystemColor.menu);
 		btnHow.setUI(new BasicButtonUI());
 		btnHow.setToolTipText("How do I use this program?");
@@ -237,7 +231,7 @@ public class App {
 				if (response == JFileChooser.APPROVE_OPTION) {
 					File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
 					lblStatus.setText("Source selected: "+file.getAbsolutePath());
-					btnRun.setEnabled(true);
+//					btnRun.setEnabled(true);
 					try {
 						if(file != null) sourceFile = file;
 					} catch (Exception err) {
@@ -278,14 +272,20 @@ public class App {
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Verify input file, then input text
-				if(inputFile != null) { // Imported file takes precedence
+				if(sourceFile == null) {
+					sourceFile = new File("S:\\Purchasing\\GeneralShare\\Customer Style Listing\\Customer Style List Master Sheet for "+TODAY+".xlsx");
+					if(!sourceFile.exists())
+						JOptionPane.showMessageDialog(null, "Today's source file cannot be detected.\nPlease choose the source file for reference. sourcefile is S:\\Purchasing\\GeneralShare\\Customer Style Listing\\Customer Style List Master Sheet for "+TODAY+".xlsx","Source File Not Fuund", JOptionPane.WARNING_MESSAGE);
+				} else if(!sourceFile.exists()) {
+					JOptionPane.showMessageDialog(null, "Today's source file cannot be detected.\nPlease choose the source file for reference.","Source File Not Fuund", JOptionPane.WARNING_MESSAGE);
+				} else if(inputFile != null) { // Imported file takes precedence
 					readInputFile();
 					everythingelse("Processing imported textfile...");
 				} else if(!textArea.getText().equals(null) && !textArea.getText().equals("")) {
 					readInputText();
 					everythingelse("Processing text input...");
 				} else {
-					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showMessageDialog(null, "There is no input to be processed.\nPlease import a textfile (*.txt) or list out the designs you would like to check for in the input field.","No Input", JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		});
@@ -295,7 +295,7 @@ public class App {
 				JOptionPane.showMessageDialog(null, "To run this program, you need a source file and a list of designs.\n"
 						+"\nComponents:"
 						+"\n\u2022 [Source] - button to select your source file. Select the latest master style list to get an accurate search result."
-						+"\n\u2022 [Import] - button to import your textfile with a list of designs you wish to inquire about."
+						+"\n\u2022 [Import] - button to import your textfile (only *.txt) with a list of designs you wish to inquire about."
 						+"\n\u2003\u2003\u2003\u2003\u2003This takes precedence over the text area. If there is an imported file, "
 						+"\n\u2003\u2003\u2003\u2003\u2003that file will be processed regardless of any text input in the text area."
 						+"\n\u2022 Text Area - where you type in your list of designs to check."
