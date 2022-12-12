@@ -8,8 +8,11 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.SystemColor;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,8 +35,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -48,9 +53,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 /**
  * @author diannerobbi
  */
-public class App {
+public class App implements PropertyChangeListener {
 
-	private static int progress;
 	private JFrame frame;
 	private static JTextArea topLabel;
 	private static JButton btnRun;
@@ -63,7 +67,7 @@ public class App {
 	private static String TODAY;
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
-	final static int HEADER_SIZE = 23;
+	final static int HEADER_SIZE = 24;
 	private static JTextArea lblStatus;
 	private static JPanel buttonsPanel;
 	private static JPanel bigBoxPanel;
@@ -73,6 +77,7 @@ public class App {
 	private static JPanel mainPanel;
 	private static JPanel howToPanel;
 	private static JPanel rightPanel;
+	private static JProgressBar progressBar;
 	private static App window;
 	private static File sourceFile;
 	private static File inputFile;
@@ -80,6 +85,8 @@ public class App {
 	private static String[] listOfDesigns;
 	private static int[] listOfIndeces;
 
+	private Task task;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -130,6 +137,7 @@ public class App {
 		btnRun.setToolTipText("Process the input list of designs and/or item IDs.");
 //		btnRun.setEnabled(false);
 		
+		progressBar = new JProgressBar(0,100);
 		buttonsPanel.add(btnSource);
 		buttonsPanel.add(btnImport);
 		buttonsPanel.add(btnRun);
@@ -165,6 +173,9 @@ public class App {
 		rightPanel.add(howToPanel, BorderLayout.PAGE_END);
 		
 		// Input Text Area
+		progressBar = new JProgressBar(0,100);
+		progressBar.setValue(0);
+		progressBar.setStringPainted(true);
 		textArea = new JTextArea();
 		textAreaPane = new JScrollPane(textArea);
 		textAreaPane.setPreferredSize(new Dimension(300, 0));
@@ -202,6 +213,7 @@ public class App {
 		topLabel.setWrapStyleWord(true);
 		topLabel.setLineWrap(true);
 		topLabelPanel.setLayout(new BorderLayout());
+		topLabelPanel.add(progressBar);
 		topLabelPanel.add(topLabel, BorderLayout.WEST);
 		topLabelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 		bigBoxPanel.add(topLabelPanel);
@@ -311,89 +323,106 @@ public class App {
 		});
 	}
 	
-	public static void everythingelse(String message) {
+	public void everythingelse(String message) {
 		lblStatus.setText("Processing, please wait for a confirmation message for the results file.");
 		JOptionPane.showMessageDialog(null, message);
-		generateExcelFile();
-		JOptionPane.showMessageDialog(null, "Your search results are printed out. Please find it on the following path:\n"+DESTINATION_PATH);
-		lblStatus.setText("Process Completed. You may run another search.");
+		task = new Task();
+		task.addPropertyChangeListener(this);
+		task.execute();
 	}
 	
-	public static void generateExcelFile() {
-		try {
-			Set<Integer> indexList = new HashSet<Integer>();
-			indexList.add(0); // Add the header index for copying over
-			FileInputStream fis = new FileInputStream(sourceFile);
-			XSSFWorkbook wb = new XSSFWorkbook(fis);
-			Sheet sheet = wb.getSheetAt(0);
-			for(int i = 0; i < listOfDesigns.length; i++) {
-				progress = i/listOfDesigns.length;
-				int length = listOfDesigns[i].length();
-				if(length == 0) continue;
-				boolean turnedTrue = false;
-				Row row;
-				for(int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) { // Iterate Workbook rows
-					row = sheet.getRow(r);
-					Cell cell = row.getCell(0);
-					if(cell == null) continue;
-					else if(cell.getStringCellValue().length() >= length) {
-						if(cell.getStringCellValue().substring(0,length).equals(listOfDesigns[i])) {
-							turnedTrue = true;
-							indexList.add(r);
-						} else if(turnedTrue) break; // moves on to the next design
+	class Task extends SwingWorker<Void, Void> {
+		@Override
+		public Void doInBackground() {
+			try {
+				setProgress(0);
+				Set<Integer> indexList = new HashSet<Integer>();
+				indexList.add(0); // Add the header index for copying over
+				FileInputStream fis = new FileInputStream(sourceFile);
+				XSSFWorkbook wb = new XSSFWorkbook(fis);
+				Sheet sheet = wb.getSheetAt(0);
+				
+				// 0% done
+				for(int i = 0; i < listOfDesigns.length; i++) {
+					out("# of Designs is " + listOfDesigns.length);
+					int length = listOfDesigns[i].length();
+					int variable = ((i+1)*100)/listOfDesigns.length;
+					out("Let's divide. i is "+ (1+i)+" list of designs is " + listOfDesigns.length +" i/listOfDesigns is => "+(((i+1)*100)/listOfDesigns.length));
+					if(length == 0) continue;
+					boolean turnedTrue = false;
+					Row row;
+					for(int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) { // Iterate Workbook rows
+						setProgress(((variable*r)/sheet.getPhysicalNumberOfRows()));
+						out("Let's divide. r is "+ r +" sheet rows is " + sheet.getPhysicalNumberOfRows() +" r/sheet.getPhysicalNumberOfRows is => "+((variable*r)/sheet.getPhysicalNumberOfRows()));
+						out("Multiply both to get the actual...."+ ((variable*r)/sheet.getPhysicalNumberOfRows()));
+						row = sheet.getRow(r);
+						Cell cell = row.getCell(0);
+						if(cell == null) continue;
+						else if(cell.getStringCellValue().length() >= length) {
+							if(cell.getStringCellValue().substring(0,length).equals(listOfDesigns[i])) {
+								turnedTrue = true;
+								indexList.add(r);
+							} else if(turnedTrue) break; // moves on to the next design
+						}
 					}
 				}
-			}
-			
-			listOfIndeces = new int[indexList.size()];
-			listOfIndeces = convertSetToArray(indexList);
-			Arrays.sort(listOfIndeces);
-			
-			// GET DESIRED DESTINATION
-			JFileChooser directoryChooser = new JFileChooser();
-			directoryChooser.setDialogTitle("Select a Destination for the Output Excel File (*.xlsx)");
-			directoryChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			directoryChooser.setFileFilter(new FileNameExtensionFilter("xlsx files (*.xlsx)", "xlsx"));
-			int response = directoryChooser.showSaveDialog(null);
-			if (response == JFileChooser.APPROVE_OPTION) {
-				DESTINATION_PATH = directoryChooser.getSelectedFile().getAbsolutePath();
-				if (DESTINATION_PATH.length() < FILE_EXTENSION.length()) {
-					DESTINATION_PATH += FILE_EXTENSION;
-				} else if (!(DESTINATION_PATH.substring(DESTINATION_PATH.length() - FILE_EXTENSION.length()))
-						.equals(".xlsx")) {
-					DESTINATION_PATH += FILE_EXTENSION;
-				} 
-			}
-			
-			XSSFWorkbook outb = new XSSFWorkbook();
-			FileOutputStream fos = new FileOutputStream(DESTINATION_PATH);
-						
-			XSSFFont headerFont = outb.createFont();
-			Sheet sh = outb.createSheet();
-			headerFont.setBold(true);
-			for (int r = 0; r < listOfIndeces.length; r++) {
-				Row row = sh.createRow(r);
-				Row rowin = sheet.getRow(listOfIndeces[r]);
-				for (int col = 0; col < HEADER_SIZE; col++) {
-					Cell cell = row.createCell(col);
-					Cell cell2 = rowin.getCell(col);
-					if(cell2==null) cell.setBlank();
-					else cell.setCellValue(rowin.getCell(col).getStringCellValue());
+				listOfIndeces = new int[indexList.size()];
+				listOfIndeces = convertSetToArray(indexList);
+				Arrays.sort(listOfIndeces);
+
+				// GET DESIRED DESTINATION
+				JFileChooser directoryChooser = new JFileChooser();
+				directoryChooser.setDialogTitle("Select a Destination for the Output Excel File (*.xlsx)");
+				directoryChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				directoryChooser.setFileFilter(new FileNameExtensionFilter("xlsx files (*.xlsx)", "xlsx"));
+				int response = directoryChooser.showSaveDialog(null);
+				if (response == JFileChooser.APPROVE_OPTION) {
+					DESTINATION_PATH = directoryChooser.getSelectedFile().getAbsolutePath();
+					if (DESTINATION_PATH.length() < FILE_EXTENSION.length()) {
+						DESTINATION_PATH += FILE_EXTENSION;
+					} else if (!(DESTINATION_PATH.substring(DESTINATION_PATH.length() - FILE_EXTENSION.length()))
+							.equals(".xlsx")) {
+						DESTINATION_PATH += FILE_EXTENSION;
+					} 
 				}
+				
+				XSSFWorkbook outb = new XSSFWorkbook();
+				FileOutputStream fos = new FileOutputStream(DESTINATION_PATH);
+							
+				XSSFFont headerFont = outb.createFont();
+				Sheet sh = outb.createSheet();
+				headerFont.setBold(true);
+				for (int r = 0; r < listOfIndeces.length; r++) {
+					Row row = sh.createRow(r);
+					Row rowin = sheet.getRow(listOfIndeces[r]);
+					for (int col = 0; col < HEADER_SIZE; col++) {
+						Cell cell = row.createCell(col);
+						Cell cell2 = rowin.getCell(col);
+						if(cell2==null) cell.setBlank();
+						else cell.setCellValue(rowin.getCell(col).getStringCellValue());
+					}
+				}
+				
+				outb.write(fos);
+				fos.close();
+				wb.close();
+				outb.close();
+				Desktop.getDesktop().open(new File(DESTINATION_PATH));
+			} catch (IOException ioe) {
+				// TODO Auto-generated catch block
+				ioe.printStackTrace();
 			}
-			
-			outb.write(fos);
-			fos.close();
-			wb.close();
-			outb.close();
-			Desktop.getDesktop().open(new File(DESTINATION_PATH));
-		} catch (IOException ioe) {
-			// TODO Auto-generated catch block
-			ioe.printStackTrace();
+			return null;
+		}
+		@Override
+		public void done() {
+			Toolkit.getDefaultToolkit().beep();
+			JOptionPane.showMessageDialog(null, "Your search results are printed out. Please find it on the following path:\n"+DESTINATION_PATH);
+			lblStatus.setText("Process Completed. You may run another search.");
 		}
 	}
 	
-	public static void readInputText() {
+	public void readInputText() {
 		// read and save into list
 		Set<String> designList = new HashSet<String>();
 		String line = textArea.getText();
@@ -406,7 +435,7 @@ public class App {
 		Arrays.sort(listOfDesigns);
 	}
 	
-	public static void readInputFile() {
+	public void readInputFile() {
 		try {
 			// read and save into list
 			Set<String> designList = new HashSet<String>();
@@ -430,7 +459,7 @@ public class App {
 		}
 	}
 	
-	public static Set<String> convertArrayToSet(String[] array) {
+	public Set<String> convertArrayToSet(String[] array) {
 		Set<String> set = new HashSet<String>();
 		for (String elem : array) {
 			set.add(elem.toUpperCase());
@@ -438,7 +467,7 @@ public class App {
 		return set;
 	}
 	
-	public static int[] convertSetToArray(Set<Integer> set) {
+	public int[] convertSetToArray(Set<Integer> set) {
 		int[] array = new int[set.size()];
 		Iterator<Integer> it = set.iterator();
 		int counter = 0;
@@ -448,7 +477,17 @@ public class App {
 		return array;
 	}
 	
-	public static void out(String stringToPrint) {
+	public void out(String stringToPrint) {
 		System.out.println(stringToPrint);
+	}
+
+	public void propertyChange(PropertyChangeEvent evt) {
+		if("progress" == evt.getPropertyName()) {
+			out("progress is detected");
+			int progress = (Integer) evt.getNewValue();
+			out("==> " + progress);
+			progressBar.setValue(progress);
+		}
+		
 	}
 }
