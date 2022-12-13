@@ -77,6 +77,7 @@ public class App implements PropertyChangeListener {
 	private static JPanel mainPanel;
 	private static JPanel howToPanel;
 	private static JPanel rightPanel;
+	private static JPanel progressPanel;
 	private static JProgressBar progressBar;
 	private static App window;
 	private static File sourceFile;
@@ -123,7 +124,7 @@ public class App implements PropertyChangeListener {
 	 */
 	private void initialize() {
 		frame = new JFrame("Style Lists Checker");
-		frame.setBounds(100, 100, 520, 305);
+		frame.setBounds(100, 100, 520, 335);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout());
 		
@@ -204,6 +205,7 @@ public class App implements PropertyChangeListener {
 		// BoxLayout for top label and main components
 		bigBoxPanel = new JPanel();
 		bigBoxPanel.setLayout(new BoxLayout(bigBoxPanel, BoxLayout.Y_AXIS));
+		
 		topLabelPanel = new JPanel();
 		topLabel = new JTextArea("List out designs or item IDs to check which customers have them built out. Place IDs on separate lines or separate by comma (,).");
 		topLabel.setSize(435, 50);
@@ -213,10 +215,15 @@ public class App implements PropertyChangeListener {
 		topLabel.setWrapStyleWord(true);
 		topLabel.setLineWrap(true);
 		topLabelPanel.setLayout(new BorderLayout());
-		topLabelPanel.add(progressBar);
 		topLabelPanel.add(topLabel, BorderLayout.WEST);
 		topLabelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+		
+		progressPanel = new JPanel();
+		progressPanel.setLayout(new GridLayout());
+		progressPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 17));
+		progressPanel.add(progressBar);
 		bigBoxPanel.add(topLabelPanel);
+		bigBoxPanel.add(progressPanel);
 		bigBoxPanel.add(gridPanel);
 		
 		mainPanel = new JPanel();
@@ -342,19 +349,20 @@ public class App implements PropertyChangeListener {
 				XSSFWorkbook wb = new XSSFWorkbook(fis);
 				Sheet sheet = wb.getSheetAt(0);
 				
+				int numerator = 0;
+				int denominator = listOfDesigns.length*sheet.getPhysicalNumberOfRows();
 				// 0% done
 				for(int i = 0; i < listOfDesigns.length; i++) {
-					out("# of Designs is " + listOfDesigns.length);
 					int length = listOfDesigns[i].length();
-					int variable = ((i+1)*100)/listOfDesigns.length;
-					out("Let's divide. i is "+ (1+i)+" list of designs is " + listOfDesigns.length +" i/listOfDesigns is => "+(((i+1)*100)/listOfDesigns.length));
-					if(length == 0) continue;
+					if(length == 0) {
+						numerator += sheet.getPhysicalNumberOfRows();
+						continue;
+					}
 					boolean turnedTrue = false;
 					Row row;
 					for(int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) { // Iterate Workbook rows
-						setProgress(((variable*r)/sheet.getPhysicalNumberOfRows()));
-						out("Let's divide. r is "+ r +" sheet rows is " + sheet.getPhysicalNumberOfRows() +" r/sheet.getPhysicalNumberOfRows is => "+((variable*r)/sheet.getPhysicalNumberOfRows()));
-						out("Multiply both to get the actual...."+ ((variable*r)/sheet.getPhysicalNumberOfRows()));
+						numerator++;
+						setProgress((numerator*100)/denominator);
 						row = sheet.getRow(r);
 						Cell cell = row.getCell(0);
 						if(cell == null) continue;
@@ -366,6 +374,7 @@ public class App implements PropertyChangeListener {
 						}
 					}
 				}
+				setProgress(100);
 				listOfIndeces = new int[indexList.size()];
 				listOfIndeces = convertSetToArray(indexList);
 				Arrays.sort(listOfIndeces);
@@ -483,9 +492,7 @@ public class App implements PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent evt) {
 		if("progress" == evt.getPropertyName()) {
-			out("progress is detected");
 			int progress = (Integer) evt.getNewValue();
-			out("==> " + progress);
 			progressBar.setValue(progress);
 		}
 		

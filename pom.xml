@@ -2,8 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.journaldev.maven</groupId>
   <artifactId>designs-build-checker</artifactId>
-  <version>0.2.4-SNAPSHOT</version>
-	<!-- increased Header size -->
+  <version>0.2.5-SNAPSHOT</version>
+<!-- ver 0.2.5
+	1. Added progress bar 
+-->
   <name>designs-build-checker</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
