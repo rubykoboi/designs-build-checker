@@ -67,7 +67,7 @@ public class App implements PropertyChangeListener {
 	private static String TODAY;
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
-	final static int HEADER_SIZE = 24;
+	final static int HEADER_SIZE = 25;
 	private static JTextArea lblStatus;
 	private static JPanel buttonsPanel;
 	private static JPanel bigBoxPanel;
@@ -348,10 +348,10 @@ public class App implements PropertyChangeListener {
 				FileInputStream fis = new FileInputStream(sourceFile);
 				XSSFWorkbook wb = new XSSFWorkbook(fis);
 				Sheet sheet = wb.getSheetAt(0);
-				
+				setProgress(5);
 				int numerator = 0;
 				int denominator = listOfDesigns.length*sheet.getPhysicalNumberOfRows();
-				// 0% done
+
 				for(int i = 0; i < listOfDesigns.length; i++) {
 					int length = listOfDesigns[i].length();
 					if(length == 0) {

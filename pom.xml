@@ -2,9 +2,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.journaldev.maven</groupId>
   <artifactId>designs-build-checker</artifactId>
-  <version>0.2.5-SNAPSHOT</version>
-<!-- ver 0.2.5
-	1. Added progress bar 
+  <version>0.2.7-SNAPSHOT</version>
+<!-- ver 0.2.7
+	1. Added a bit of % for when the program begins
 -->
   <name>designs-build-checker</name>
   <properties>
