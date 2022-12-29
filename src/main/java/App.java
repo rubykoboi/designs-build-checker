@@ -350,19 +350,31 @@ public class App implements PropertyChangeListener {
 				Sheet sheet = wb.getSheetAt(0);
 				setProgress(5);
 				int numerator = 0;
-				int denominator = listOfDesigns.length*sheet.getPhysicalNumberOfRows();
-
-				for(int i = 0; i < listOfDesigns.length; i++) {
+				int denominator = listOfDesigns.length*sheet.getPhysicalNumberOfRows()/100;
+				out("There are " + listOfDesigns.length + " designs in check");
+				out("Number of rows : " + sheet.getPhysicalNumberOfRows());
+				out("Two digits less for calculations : " +sheet.getPhysicalNumberOfRows()/100);
+				
+				int i = 0;
+				for(; i < listOfDesigns.length; i++) {
 					int length = listOfDesigns[i].length();
 					if(length == 0) {
 						numerator += sheet.getPhysicalNumberOfRows();
 						continue;
 					}
+					numerator = i*sheet.getPhysicalNumberOfRows();
 					boolean turnedTrue = false;
 					Row row;
 					for(int r = 1; r < sheet.getPhysicalNumberOfRows(); r++) { // Iterate Workbook rows
-						numerator++;
-						setProgress((numerator*100)/denominator);
+						try {
+							setProgress((int)(Math.round((double)(numerator/denominator))));
+						} catch (Exception e) {
+							out("General exception was caught... " + e.getMessage());
+							out("numerator is " + numerator);
+							out("r is  " + r);
+							out("design is " + listOfDesigns[i]);
+							out("numerator / denominator is " + (numerator / denominator));
+						}
 						row = sheet.getRow(r);
 						Cell cell = row.getCell(0);
 						if(cell == null) continue;
@@ -374,6 +386,10 @@ public class App implements PropertyChangeListener {
 						}
 					}
 				}
+				out("Final i should match # of designs : " + i);
+				out("Final numerator should match the denominator * 100 : " + numerator);
+				out("Denominator is " + denominator);
+				out("numerator / denominator is " + (numerator / denominator));
 				setProgress(100);
 				listOfIndeces = new int[indexList.size()];
 				listOfIndeces = convertSetToArray(indexList);
@@ -394,7 +410,8 @@ public class App implements PropertyChangeListener {
 						DESTINATION_PATH += FILE_EXTENSION;
 					} 
 				}
-				
+
+				if (DESTINATION_PATH == null) DESTINATION_PATH = DESKTOP_PATH+"Results for Checking Designs on "+TODAY+".xlsx";
 				XSSFWorkbook outb = new XSSFWorkbook();
 				FileOutputStream fos = new FileOutputStream(DESTINATION_PATH);
 							
@@ -420,6 +437,10 @@ public class App implements PropertyChangeListener {
 			} catch (IOException ioe) {
 				// TODO Auto-generated catch block
 				ioe.printStackTrace();
+				out("Exception caught in doInBackground " + ioe.getLocalizedMessage());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				out("Exception caught in background process " + ex.getMessage());
 			}
 			return null;
 		}
