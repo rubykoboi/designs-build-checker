@@ -67,7 +67,7 @@ public class App implements PropertyChangeListener {
 	private static String TODAY;
 	final static String DESKTOP_PATH = System.getProperty("user.home") + "\\Desktop\\";
 	final static String FILE_EXTENSION = ".xlsx";
-	final static int HEADER_SIZE = 25;
+	final static int HEADER_SIZE = 26;
 	private static JTextArea lblStatus;
 	private static JPanel buttonsPanel;
 	private static JPanel bigBoxPanel;
